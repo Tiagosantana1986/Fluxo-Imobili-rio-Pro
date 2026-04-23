@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Fluxo Inteligente | Tiago Sant'ana</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0b0e14;
+            color: #eef2fb;
+            padding: 24px;
+            line-height: 1.5;
+            background-image: radial-gradient(circle at 10% 20%, #1a2a3a 0%, #0b0e14 90%);
+            min-height: 100vh;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .hero {
+            display: flex; align-items: center; gap: 24px; margin-bottom: 32px;
+            background: rgba(21,27,35,0.7); backdrop-filter: blur(8px);
+            padding: 24px 32px; border-radius: 48px; border: 1px solid #2d445b;
+            box-shadow: 0 25px 40px -15px rgba(0,0,0,0.6);
+        }
+        .avatar {
+            width: 80px; height: 80px; background: linear-gradient(145deg, #1e88e5, #0d47a1);
+            border-radius: 30px; display: flex; align-items: center; justify-content: center;
+            font-size: 36px; font-weight: 600; color: white;
+            box-shadow: 0 12px 18px -6px #1e88e550; border: 2px solid #90caf9;
+        }
+        .hero-text h1 {
+            font-size: 32px; font-weight: 600;
+            background: linear-gradient(to right, #fff, #bbdefb);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            margin-bottom: 8px;
+        }
+        .hero-text .sub {
+            font-size: 16px; color: #b0c7e9; display: flex; gap: 24px; flex-wrap: wrap;
+        }
+        .hero-text .sub i { margin-right: 6px; color: #1e88e5; }
+        .hero-cta { margin-left: auto; text-align: right; }
+        .creci-badge {
+            background: #1e2f40; padding: 10px 20px; border-radius: 40px;
+            font-weight: 600; border: 1px solid #3a5f7a;
+        }
+        .message-box {
+            background: #111e2b; border-radius: 28px; padding: 28px 32px;
+            margin-bottom: 32px; border-left: 8px solid #1e88e5;
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+            box-shadow: 0 10px 20px -5px #00000040;
+        }
+        .message-box p { font-size: 18px; max-width: 800px; color: #d6e5ff; }
+        .message-box strong { color: white; font-weight: 700; }
+        .dashboard { display: grid; grid-template-columns: 1.1fr 2fr; gap: 24px; }
+        .control-panel {
+            background: #101a24e0; backdrop-filter: blur(4px); border-radius: 28px;
+            padding: 28px 24px; border: 1px solid #2d4a63;
+            box-shadow: 0 20px 35px -8px rgba(0,0,0,0.7);
+        }
+        .section-title {
+            font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;
+            color: #9bb9f0; margin-bottom: 20px; font-weight: 600;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; font-weight: 500; color: #b4c0d0; margin-bottom: 6px; }
+        .input-wrapper {
+            display: flex; align-items: center; background: #0a121c;
+            border: 1.5px solid #2d4a63; border-radius: 16px; padding: 4px 16px;
+            transition: all 0.2s;
+        }
+        .input-wrapper:focus-within { border-color: #1e88e5; background: #0e1a26; }
+        .input-wrapper span { color: #8da3c7; font-weight: 500; margin-right: 4px; }
+        input, select {
+            background: transparent; border: none; width: 100%; padding: 14px 0;
+            font-size: 16px; font-weight: 500; color: white; outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+        input::placeholder { color: #4a607a; font-weight: 400; }
+        select option { background: #0a121c; color: white; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .btn-primary {
+            background: #1e88e5; color: white; border: none; width: 100%;
+            padding: 16px; font-weight: 600; font-size: 16px; border-radius: 40px;
+            margin-top: 16px; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 6px 14px rgba(30,136,229,0.3); border: 1px solid #4791db;
+        }
+        .btn-primary:hover { background: #1976d2; transform: scale(1.01); }
+        .btn-pdf {
+            background: #2c3e50; margin-top: 10px; box-shadow: none;
+            border: 1px solid #5f7f9f;
+        }
+        .btn-pdf:hover { background: #1f2c38; }
+        .btn-secondary {
+            background: #2a3a4a; color: white; border: 1px solid #4a6a8a;
+            padding: 12px 16px; border-radius: 40px; font-weight: 500; cursor: pointer;
+            width: 100%; margin-top: 8px; transition: 0.2s;
+        }
+        .btn-secondary:hover { background: #1e2f40; }
+        .baloes-list {
+            background: #0a121c; border-radius: 20px; padding: 16px; margin: 16px 0;
+            border: 1px solid #2d4a63; max-height: 200px; overflow-y: auto;
+        }
+        .balao-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; background: #111e2b; border-radius: 12px;
+            margin-bottom: 8px; border: 1px solid #2a4b66;
+        }
+        .balao-info { display: flex; gap: 16px; font-size: 14px; }
+        .balao-remove { color: #ef5350; cursor: pointer; padding: 6px; border-radius: 50%; }
+        .balao-remove:hover { background: #3a2020; }
+        .summary-mini {
+            background: #0b1620; border-radius: 20px; padding: 20px;
+            margin-top: 28px; border: 1px solid #2a4b66;
+        }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+        .summary-total {
+            border-top: 1px dashed #3e607b; padding-top: 14px; margin-top: 8px;
+            font-weight: 700; font-size: 18px; color: white;
+        }
+        .schedule-panel {
+            background: #0f1923e0; backdrop-filter: blur(4px); border-radius: 28px;
+            padding: 24px 20px; border: 1px solid #2d4a63;
+            box-shadow: 0 20px 35px -8px #00000080;
+        }
+        .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .table-container {
+            overflow-x: auto; border-radius: 20px; max-height: 550px;
+            overflow-y: auto; margin-bottom: 20px;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 600px; }
+        th {
+            text-align: left; padding: 16px 12px; background: #1b2a38; color: #bbd1fc;
+            font-weight: 600; font-size: 12px; position: sticky; top: 0;
+        }
+        td { padding: 14px 12px; border-bottom: 1px solid #253c50; color: #d3deed; }
+        .highlight-chave {
+            background: #1e3a5f40; font-weight: 600; color: white;
+            border-left: 4px solid #1e88e5;
+        }
+        .text-right { text-align: right; }
+        .footer-note {
+            margin-top: 18px; color: #8ba1bc; font-size: 12px;
+            display: flex; justify-content: space-between;
+        }
+        .signature { color: #bdd4f0; }
+        .divider { border-top: 1px solid #2d4a63; margin: 20px 0; }
+        @media (max-width: 900px) {
+            .dashboard { grid-template-columns: 1fr; }
+            .hero { flex-direction: column; text-align: center; }
+            .hero-cta { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <div class="avatar">TS</div>
+        <div class="hero-text">
+            <h1>Calculadora de Fluxo Inteligente <span style="font-weight:300; color:#9bb9f0;">de Parcelas</span></h1>
+            <div class="sub">
+                <span><i class="fas fa-user-check"></i> Tiago Sant'ana</span>
+                <span><i class="fas fa-id-card"></i> CRECI F45549</span>
+                <span><i class="fas fa-phone-alt"></i> (43) 99984-1199</span>
+                <span><i class="fab fa-instagram"></i> @tiagosantana_1986</span>
+            </div>
+        </div>
+        <div class="hero-cta">
+            <div class="creci-badge"><i class="fas fa-shield-alt"></i> Negociação Transparente</div>
+        </div>
+    </div>
+    <div class="message-box">
+        <p><strong>🗝️ Seu cliente não consegue visualizar o fluxo de pagamento?</strong><br>
+        Eu sei como é perder uma venda por falta de clareza nos valores. 
+        Com <strong>+10 anos de experiência</strong>, desenvolvi esta calculadora exclusiva.
+        </p>
+        <div style="font-size:40px; opacity:0.7;">📊➡️🏡</div>
+    </div>
+
+    <div class="dashboard">
+        <div class="control-panel">
+            <div class="section-title"><i class="fas fa-file-signature"></i> DADOS DO CLIENTE</div>
+            <div class="input-group"><label>Nome do Cliente</label><input type="text" id="nomeCliente" placeholder="Ex: João da Silva" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+            <div class="input-group"><label>CPF/CNPJ</label><input type="text" id="cpfCliente" placeholder="000.000.000-00" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+            <div class="input-group"><label>Telefone</label><input type="text" id="telCliente" placeholder="(00) 00000-0000" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+            <div class="input-group"><label>Email</label><input type="email" id="emailCliente" placeholder="cliente@email.com" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-building"></i> EMPREENDIMENTO</div>
+            <div class="input-group"><label>Nome do Empreendimento</label><input type="text" id="nomeEmpreendimento" placeholder="Ex: Residencial Morada do Vale" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-home"></i> DADOS DO IMÓVEL</div>
+            <div class="input-group"><label>Valor do Imóvel (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="valorImovel" placeholder="0,00" step="1000"></div></div>
+            <div class="row-2">
+                <div class="input-group"><label>Termo de Adesão (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="termoAdesao" placeholder="0,00" step="1000"></div></div>
+                <div class="input-group"><label>Sinal de Negócio (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="sinal" placeholder="0,00" step="1000"></div></div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-coins"></i> ENTRADA (adicional)</div>
+            <div class="input-group"><label>Tipo de Entrada</label><select id="tipoEntrada" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white;"><option value="avista">À Vista (em um mês específico)</option><option value="parcelada">Parcelada (em N vezes)</option></select></div>
+            <div id="entradaAvista">
+                <div class="row-2">
+                    <div class="input-group"><label>Valor da Entrada (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="entradaValor" placeholder="0,00" step="1000"></div></div>
+                    <div class="input-group"><label>Mês da Entrada</label><input type="number" id="entradaMes" placeholder="0" min="1" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white;"></div>
+                </div>
+            </div>
+            <div id="entradaParcelada" style="display:none;">
+                <div class="row-3">
+                    <div class="input-group"><label>Valor Total (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="entradaParceladaValor" placeholder="0,00" step="1000"></div></div>
+                    <div class="input-group"><label>Nº Parcelas</label><input type="number" id="entradaParceladaVezes" placeholder="0" min="1" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white;"></div>
+                    <div class="input-group"><label>Início (Mês)</label><input type="number" id="entradaParceladaInicio" placeholder="0" min="1" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white;"></div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-calendar-alt"></i> PARCELAS MENSAIS</div>
+            <div class="input-group"><label>Modo de Amortização</label><select id="modoAmortizacao" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white;"><option value="personalizado">Personalizado</option><option value="sac">SAC</option><option value="price">PRICE</option></select></div>
+            <div id="modoPersonalizado">
+                <div class="row-2">
+                    <div class="input-group"><label>Nº Parcelas</label><input type="number" id="numParcelas" placeholder="0" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white;"></div>
+                    <div class="input-group"><label>Valor da Parcela (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="valorParcela" placeholder="0,00" step="100"></div></div>
+                </div>
+            </div>
+            <div id="modoSacPrice" style="display:none;">
+                <div class="input-group"><label>Prazo (meses)</label><input type="number" id="prazoSacPrice" placeholder="0" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white;"></div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-layer-group"></i> BALÕES INTERMEDIÁRIOS</div>
+            <div style="display: flex; gap: 8px;">
+                <div style="flex:2;"><input type="number" id="novoBalaoValor" placeholder="Valor (R$)" step="1000" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+                <div style="flex:1;"><input type="number" id="novoBalaoMes" placeholder="Mês" min="1" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+                <button class="btn-secondary" id="adicionarBalaoBtn" style="width:auto; margin:0; padding:0 20px;"><i class="fas fa-plus"></i></button>
+            </div>
+            <div class="baloes-list"><div id="baloesLista" style="color:#8ba1bc; text-align:center; padding:10px;">Nenhum balão adicionado.</div></div>
+
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-key"></i> PARCELA CHAVE</div>
+            <div class="row-2">
+                <div class="input-group"><label>Valor (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="chaveValor" placeholder="0,00" step="5000"></div></div>
+                <div class="input-group"><label>Mês da Chave</label><input type="number" id="mesChave" placeholder="0" min="1" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white;"></div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-title"><i class="fas fa-percent"></i> JUROS DA OBRA</div>
+            <div class="row-2">
+                <div class="input-group"><label>Taxa de Juros (%)</label><div class="input-wrapper"><span>%</span><input type="number" id="jurosTaxa" placeholder="0,00" step="0.01"></div></div>
+                <div class="input-group"><label>Período</label><select id="jurosPeriodo" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white;"><option value="mensal">Mensal</option><option value="anual">Anual</option></select></div>
+            </div>
+            <div style="font-size:12px; color:#8ba1bc; margin-top:6px;">Incidem até o mês da chave.</div>
+
+            <button class="btn-primary" id="calcularBtn"><i class="fas fa-calculator"></i> CALCULAR FLUXO</button>
+            <button class="btn-primary btn-pdf" id="exportarPdfBtn"><i class="fas fa-file-pdf"></i> EXPORTAR PDF</button>
+
+            <div class="summary-mini">
+                <div class="summary-row"><span>Total Pago (sem juros):</span> <span id="totalPagoBruto">R$ 0,00</span></div>
+                <div class="summary-row"><span>Juros Estimados:</span> <span id="totalJuros">R$ 0,00</span></div>
+                <div class="summary-row summary-total"><span>Saldo Devedor Final:</span> <span id="saldoFinalDisplay">R$ 0,00</span></div>
+                <div id="mensagemStatus" style="font-size:12px; margin-top:12px; color:#b0c7e9;"></div>
+            </div>
+        </div>
+
+        <div class="schedule-panel">
+            <div class="schedule-header">
+                <div class="section-title" style="margin-bottom:0;"><i class="fas fa-table"></i> <span id="tituloCronograma">CRONOGRAMA DETALHADO</span></div>
+                <div style="font-size:13px; background:#1e3a5f; padding:4px 12px; border-radius:40px;">Simulação</div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Mês</th><th>Evento</th><th class="text-right">Valor Pago</th><th class="text-right">Juros</th><th class="text-right">Amortização</th><th class="text-right">Saldo Devedor</th></tr></thead>
+                    <tbody id="corpoTabela"></tbody>
+                </table>
+            </div>
+            <div class="footer-note">
+                <span><i class="far fa-calendar-alt"></i> * Juros até o mês da chave. Balões adicionais não substituem parcelas.</span>
+                <span class="signature">Tiago Sant'ana · CRECI F45549</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    "use strict";
+    var nomeClienteInput = document.getElementById('nomeCliente');
+    var cpfClienteInput = document.getElementById('cpfCliente');
+    var telClienteInput = document.getElementById('telCliente');
+    var emailClienteInput = document.getElementById('emailCliente');
+    var nomeInput = document.getElementById('nomeEmpreendimento');
+    var valorImovelInput = document.getElementById('valorImovel');
+    var termoAdesaoInput = document.getElementById('termoAdesao');
+    var sinalInput = document.getElementById('sinal');
+    var tipoEntradaSelect = document.getElementById('tipoEntrada');
+    var entradaAvistaDiv = document.getElementById('entradaAvista');
+    var entradaParceladaDiv = document.getElementById('entradaParcelada');
+    var entradaValorInput = document.getElementById('entradaValor');
+    var entradaMesInput = document.getElementById('entradaMes');
+    var entradaParcTotal = document.getElementById('entradaParceladaValor');
+    var entradaParcVezes = document.getElementById('entradaParceladaVezes');
+    var entradaParcInicio = document.getElementById('entradaParceladaInicio');
+    var modoSelect = document.getElementById('modoAmortizacao');
+    var modoPersDiv = document.getElementById('modoPersonalizado');
+    var modoSacPriceDiv = document.getElementById('modoSacPrice');
+    var numParcelasInput = document.getElementById('numParcelas');
+    var valorParcelaInput = document.getElementById('valorParcela');
+    var prazoInput = document.getElementById('prazoSacPrice');
+    var chaveValorInput = document.getElementById('chaveValor');
+    var mesChaveInput = document.getElementById('mesChave');
+    var jurosTaxaInput = document.getElementById('jurosTaxa');
+    var jurosPeriodoSelect = document.getElementById('jurosPeriodo');
+    var totalPagoSpan = document.getElementById('totalPagoBruto');
+    var totalJurosSpan = document.getElementById('totalJuros');
+    var saldoFinalSpan = document.getElementById('saldoFinalDisplay');
+    var msgStatus = document.getElementById('mensagemStatus');
+    var corpoTabela = document.getElementById('corpoTabela');
+    var tituloCron = document.getElementById('tituloCronograma');
+    var calcularBtn = document.getElementById('calcularBtn');
+    var pdfBtn = document.getElementById('exportarPdfBtn');
+    var novoValor = document.getElementById('novoBalaoValor');
+    var novoMes = document.getElementById('novoBalaoMes');
+    var addBalaoBtn = document.getElementById('adicionarBalaoBtn');
+    var baloesLista = document.getElementById('baloesLista');
+
+    var baloes = [];
+    var ultimaSimulacao = { linhas: [], resumo: {}, params: {}, cliente: {} };
+
+    function formatReal(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+
+    function atualizarTitulo() {
+        var nome = nomeInput.value.trim();
+        tituloCron.textContent = nome ? 'CRONOGRAMA - ' + nome.toUpperCase() : 'CRONOGRAMA DETALHADO';
+    }
+    nomeInput.addEventListener('input', atualizarTitulo);
+    tipoEntradaSelect.addEventListener('change', function(){
+        entradaAvistaDiv.style.display = this.value === 'avista' ? 'block' : 'none';
+        entradaParceladaDiv.style.display = this.value === 'avista' ? 'none' : 'block';
+    });
+    modoSelect.addEventListener('change', function(){
+        modoPersDiv.style.display = this.value === 'personalizado' ? 'block' : 'none';
+        modoSacPriceDiv.style.display = this.value === 'personalizado' ? 'none' : 'block';
+    });
+
+    function renderizarBaloes() {
+        if (!baloes.length) { baloesLista.innerHTML = '<div style="color:#8ba1bc; text-align:center; padding:10px;">Nenhum balão adicionado.</div>'; return; }
+        var h = '';
+        baloes.forEach(function(b, i){
+            h += '<div class="balao-item"><div class="balao-info"><strong>' + formatReal(b.valor) + '</strong> Mês ' + b.mes + '</div><div class="balao-remove" data-index="' + i + '"><i class="fas fa-trash-alt"></i></div></div>';
+        });
+        baloesLista.innerHTML = h;
+        document.querySelectorAll('.balao-remove').forEach(function(el){
+            el.addEventListener('click', function(){
+                var idx = el.dataset.index;
+                if (idx !== undefined) { baloes.splice(idx, 1); renderizarBaloes(); }
+            });
+        });
+    }
+    addBalaoBtn.addEventListener('click', function(){
+        var v = parseFloat(novoValor.value), m = parseInt(novoMes.value);
+        if (isNaN(v) || v <= 0 || isNaN(m) || m <= 0) { alert('Valor e mês válidos.'); return; }
+        baloes.push({ valor: v, mes: m });
+        renderizarBaloes();
+        novoValor.value = ''; novoMes.value = '';
+    });
+
+    function calcularFluxo() {
+        var vImovel = parseFloat(valorImovelInput.value) || 0;
+        var termoAdesao = parseFloat(termoAdesaoInput.value) || 0;
+        var sinal = parseFloat(sinalInput.value) || 0;
+        var chaveV = parseFloat(chaveValorInput.value) || 0;
+        var mesChave = parseInt(mesChaveInput.value) || 0;
+        var taxa = parseFloat(jurosTaxaInput.value) || 0;
+        if (jurosPeriodoSelect.value === 'anual') {
+            taxa = taxa > 0 ? Math.pow(1 + taxa / 100, 1 / 12) - 1 : 0;
+        } else {
+            taxa = taxa / 100;
+        }
+        if (vImovel <= 0) { alert('Valor do imóvel obrigatório.'); return; }
+
+        var parcelas = [];
+        var modo = modoSelect.value;
+        if (modo === 'personalizado') {
+            var n = parseInt(numParcelasInput.value) || 0;
+            var v = parseFloat(valorParcelaInput.value) || 0;
+            for (var i = 1; i <= n; i++) parcelas.push({ mes: i, valor: v });
+        } else {
+            var prazo = parseInt(prazoInput.value) || 0;
+            if (prazo <= 0) { alert('Prazo necessário.'); return; }
+            var saldo = vImovel - termoAdesao - sinal;
+            if (modo === 'sac') {
+                var amort = saldo / prazo;
+                for (var i = 1; i <= prazo; i++) {
+                    var juros = (saldo - amort * (i - 1)) * taxa;
+                    parcelas.push({ mes: i, valor: amort + juros });
+                }
+            } else {
+                var pmt = taxa === 0 ? saldo / prazo : saldo * (taxa * Math.pow(1 + taxa, prazo)) / (Math.pow(1 + taxa, prazo) - 1);
+                for (var i = 1; i <= prazo; i++) parcelas.push({ mes: i, valor: pmt });
+            }
+        }
+        if (mesChave === 0) mesChave = parcelas.length ? Math.max.apply(null, parcelas.map(function(p){ return p.mes; })) : 0;
+
+        var eventos = [];
+        if (termoAdesao > 0) eventos.push({ mes: 0, tipo: 'termo', valor: termoAdesao });
+        if (sinal > 0) eventos.push({ mes: 0, tipo: 'sinal', valor: sinal });
+        parcelas.forEach(function(p){ eventos.push({ mes: p.mes, tipo: 'parcela', valor: p.valor }); });
+        if (tipoEntradaSelect.value === 'avista') {
+            var ve = parseFloat(entradaValorInput.value) || 0;
+            var me = parseInt(entradaMesInput.value);
+            if (ve > 0 && !isNaN(me) && me > 0) eventos.push({ mes: me, tipo: 'entrada', valor: ve });
+        } else {
+            var tot = parseFloat(entradaParcTotal.value) || 0;
+            var vezes = parseInt(entradaParcVezes.value) || 0;
+            var ini = parseInt(entradaParcInicio.value);
+            if (tot > 0 && vezes > 0 && !isNaN(ini) && ini > 0) {
+                var vp = tot / vezes;
+                for (var i = 0; i < vezes; i++) eventos.push({ mes: ini + i, tipo: 'entradaParc', valor: vp });
+            }
+        }
+        baloes.forEach(function(b){ if (b.valor > 0 && b.mes > 0) eventos.push({ mes: b.mes, tipo: 'balao', valor: b.valor }); });
+        if (chaveV > 0 && mesChave > 0) eventos.push({ mes: mesChave, tipo: 'chave', valor: chaveV });
+        eventos.sort(function(a, b){ return a.mes - b.mes; });
+
+        var saldo = vImovel - termoAdesao - sinal, jurosTotal = 0, pagoBruto = termoAdesao + sinal;
+        var linhas = [];
+        if (termoAdesao > 0) linhas.push({ mes: 0, evento: 'Termo de Adesão', valorPago: termoAdesao, juros: 0, amortizacao: termoAdesao, saldo: saldo });
+        if (sinal > 0) linhas.push({ mes: 0, evento: 'Sinal de Negócio', valorPago: sinal, juros: 0, amortizacao: sinal, saldo: saldo });
+
+        for (var i = 0; i < eventos.length; i++) {
+            var ev = eventos[i];
+            if (ev.mes === 0) continue;
+            var m = ev.mes, valor = ev.valor; pagoBruto += valor;
+            var juros = 0;
+            if (m <= mesChave && saldo > 0.001) { juros = saldo * taxa; jurosTotal += juros; }
+            var amort = valor - juros; if (amort < 0) amort = 0;
+            saldo = Math.max(0, saldo - amort);
+            var nome = ev.tipo === 'parcela' ? 'Parcela ' + m :
+                       ev.tipo === 'entrada' ? '💰 Entrada' :
+                       ev.tipo === 'entradaParc' ? '💰 Entrada Parc.' :
+                       ev.tipo === 'balao' ? '📌 Balão' : '🏠 Chave';
+            linhas.push({ mes: m, evento: nome, valorPago: valor, juros: juros, amortizacao: amort, saldo: saldo });
+        }
+
+        totalPagoSpan.textContent = formatReal(pagoBruto);
+        totalJurosSpan.textContent = formatReal(jurosTotal);
+        saldoFinalSpan.textContent = formatReal(saldo);
+        if (Math.abs(saldo) < 0.01) { msgStatus.innerHTML = '✅ Fluxo equilibrado'; saldoFinalSpan.style.color = '#81c784'; }
+        else if (saldo > 0) { msgStatus.innerHTML = '⚠️ Saldo devedor'; saldoFinalSpan.style.color = '#ffb74d'; }
+        else { msgStatus.innerHTML = '🔵 Excedente'; saldoFinalSpan.style.color = '#64b5f6'; }
+
+        var html = '';
+        linhas.forEach(function(l){
+            var cls = (l.mes === mesChave && l.evento.includes('Chave')) ? 'highlight-chave' : '';
+            html += '<tr class="' + cls + '"><td>' + (l.mes === 0 ? '—' : l.mes) + '</td><td>' + l.evento + '</td><td class="text-right">' + formatReal(l.valorPago) + '</td><td class="text-right">' + formatReal(l.juros) + '</td><td class="text-right">' + formatReal(l.amortizacao) + '</td><td class="text-right">' + formatReal(l.saldo) + '</td></tr>';
+        });
+        corpoTabela.innerHTML = html;
+
+        ultimaSimulacao = {
+            linhas: linhas,
+            resumo: { pago: formatReal(pagoBruto), juros: formatReal(jurosTotal), saldo: formatReal(saldo) },
+            params: {
+                emp: nomeInput.value.trim() || 'Não informado',
+                vImovel: formatReal(vImovel),
+                termo: formatReal(termoAdesao),
+                sinal: formatReal(sinal),
+                parcelas: modo === 'personalizado' ? (numParcelasInput.value || 0) + 'x ' + formatReal(parseFloat(valorParcelaInput.value) || 0) : (prazoInput.value || 0) + ' parcelas (' + modo.toUpperCase() + ')',
+                chave: formatReal(chaveV) + ' (mês ' + mesChave + ')',
+                juros: (parseFloat(jurosTaxaInput.value) || 0) + '% ' + jurosPeriodoSelect.value
+            },
+            cliente: {
+                nome: nomeClienteInput.value.trim() || 'Não informado',
+                cpf: cpfClienteInput.value.trim() || 'Não informado',
+                tel: telClienteInput.value.trim() || 'Não informado',
+                email: emailClienteInput.value.trim() || 'Não informado'
+            }
+        };
+        atualizarTitulo();
+    }
+
+    function gerarPDF() {
+        if (!ultimaSimulacao.linhas.length) calcularFluxo();
+        var doc = new window.jspdf.jsPDF();
+        var e = ultimaSimulacao.params.emp;
+        var c = ultimaSimulacao.cliente;
+
+        doc.setFontSize(22); doc.setTextColor(30, 136, 229); doc.text('Calculadora de Fluxo Inteligente', 14, 20);
+        doc.setFontSize(12); doc.setTextColor(80); doc.text('Proposta de Pagamento Personalizada', 14, 28);
+        doc.setFontSize(11); doc.setTextColor(40);
+        doc.text('Cliente: ' + c.nome, 14, 40);
+        doc.text('CPF/CNPJ: ' + c.cpf, 14, 46);
+        doc.text('Telefone: ' + c.tel, 14, 52);
+        doc.text('Email: ' + c.email, 14, 58);
+        doc.text('Empreendimento: ' + e, 14, 68);
+        doc.text('Tiago Sant\'ana - CRECI F45549 - (43) 99984-1199', 14, 76);
+
+        doc.autoTable({
+            startY: 85,
+            head: [['Item', 'Valor']],
+            body: [
+                ['Valor do Imóvel', ultimaSimulacao.params.vImovel],
+                ['Termo de Adesão', ultimaSimulacao.params.termo],
+                ['Sinal de Negócio', ultimaSimulacao.params.sinal],
+                ['Parcelas Mensais', ultimaSimulacao.params.parcelas],
+                ['Parcela Chave', ultimaSimulacao.params.chave],
+                ['Juros', ultimaSimulacao.params.juros],
+                ['Total Pago (sem juros)', ultimaSimulacao.resumo.pago],
+                ['Total de Juros', ultimaSimulacao.resumo.juros],
+                ['Saldo Final', ultimaSimulacao.resumo.saldo]
+            ],
+            theme: 'grid',
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [30, 136, 229] }
+        });
+
+        var yAtual = doc.lastAutoTable.finalY + 8;
+
+        var entradas = ultimaSimulacao.linhas.filter(function(l){ return l.evento.includes('Entrada'); });
+        if (entradas.length > 0) {
+            doc.setFontSize(13); doc.setTextColor(30, 136, 229);
+            doc.text('PARCELAS DE ENTRADA', 14, yAtual);
+            yAtual += 6;
+            var entradasBody = entradas.map(function(e){ return ['Mês ' + e.mes, formatReal(e.valorPago)]; });
+            doc.autoTable({ startY: yAtual, head: [['Mês', 'Valor']], body: entradasBody, theme: 'striped', styles: { fontSize: 9 }, headStyles: { fillColor: [100, 100, 100] }, columnStyles: { 1: { halign: 'right' } } });
+            yAtual = doc.lastAutoTable.finalY + 8;
+        }
+
+        var baloesLinhas = ultimaSimulacao.linhas.filter(function(l){ return l.evento.includes('Balão'); });
+        if (baloesLinhas.length > 0) {
+            doc.setFontSize(13); doc.setTextColor(30, 136, 229);
+            doc.text('BALÕES INTERMEDIÁRIOS', 14, yAtual);
+            yAtual += 6;
+            var baloesBody = baloesLinhas.map(function(b){ return ['Mês ' + b.mes, formatReal(b.valorPago)]; });
+            doc.autoTable({ startY: yAtual, head: [['Mês do Balão', 'Valor']], body: baloesBody, theme: 'striped', styles: { fontSize: 9 }, headStyles: { fillColor: [255, 152, 0] }, columnStyles: { 1: { halign: 'right' } } });
+            yAtual = doc.lastAutoTable.finalY + 8;
+        }
+
+        var chave = ultimaSimulacao.linhas.find(function(l){ return l.evento.includes('Chave'); });
+        if (chave) {
+            doc.setFontSize(13); doc.setTextColor(30, 136, 229);
+            doc.text('PARCELA CHAVE (Entrega)', 14, yAtual);
+            yAtual += 6;
+            doc.autoTable({ startY: yAtual, head: [['Mês', 'Valor']], body: [['Mês ' + chave.mes, formatReal(chave.valorPago)]], theme: 'striped', styles: { fontSize: 9 }, headStyles: { fillColor: [46, 125, 50] }, columnStyles: { 1: { halign: 'right' } } });
+            yAtual = doc.lastAutoTable.finalY + 10;
+        }
+
+        doc.setFontSize(14); doc.setTextColor(30, 136, 229);
+        doc.text('CRONOGRAMA DETALHADO DE PAGAMENTOS', 14, yAtual);
+        yAtual += 6;
+        var colunas = ['Mês', 'Evento', 'Valor Pago', 'Juros', 'Amortização', 'Saldo Devedor'];
+        var linhasPDF = ultimaSimulacao.linhas.map(function(l){
+            return [l.mes === 0 ? '—' : l.mes, l.evento, formatReal(l.valorPago), formatReal(l.juros), formatReal(l.amortizacao), formatReal(l.saldo)];
+        });
+        doc.autoTable({ startY: yAtual, head: [colunas], body: linhasPDF, theme: 'striped', styles: { fontSize: 8 }, headStyles: { fillColor: [44, 62, 80] }, columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' } } });
+
+        // ========== TERMO DE ADESÃO (PÁGINA FINAL) ==========
+        doc.addPage();
+        doc.setFontSize(18); doc.setTextColor(30, 136, 229);
+        doc.text('TERMO DE ADESÃO À PROPOSTA', 105, 20, { align: 'center' });
+        doc.setFontSize(10); doc.setTextColor(40);
+        var textoTermo = [
+            'Pelo presente instrumento, o(a) proponente abaixo qualificado(a) declara estar ciente e de acordo',
+            'com todas as condições da proposta de pagamento apresentada neste documento, referente ao',
+            'imóvel do empreendimento ' + e.toUpperCase() + ', conforme simulação detalhada nas páginas anteriores.',
+            '',
+            'O(a) proponente reconhece que:',
+            '1. Recebeu e compreendeu integralmente o cronograma de pagamentos;',
+            '2. Está ciente dos valores de entrada, parcelas mensais, balões intermediários e parcela chave;',
+            '3. Tem conhecimento da taxa de juros aplicada durante o período de obra;',
+            '4. Autoriza o corretor Tiago Sant\'ana a dar andamento ao processo de aquisição do imóvel.',
+            '',
+            'Este termo não configura contrato definitivo de compra e venda, mas sim a aceitação formal',
+            'das condições comerciais aqui simuladas, servindo como base para a elaboração do contrato final.',
+            '',
+            'Estando de acordo, firma o presente termo em duas vias de igual teor.'
+        ];
+        var yTermo = 35;
+        for (var i = 0; i < textoTermo.length; i++) {
+            doc.text(textoTermo[i], 20, yTermo);
+            yTermo += textoTermo[i] === '' ? 4 : 5;
+        }
+        yTermo += 10;
+        doc.setFontSize(11); doc.setTextColor(30, 136, 229); doc.text('DADOS DO PROPONENTE', 20, yTermo);
+        yTermo += 8;
+        doc.setFontSize(10); doc.setTextColor(40);
+        doc.text('Nome Completo: ' + c.nome, 20, yTermo); yTermo += 7;
+        doc.text('CPF/CNPJ: ' + c.cpf, 20, yTermo); yTermo += 7;
+        doc.text('Telefone: ' + c.tel, 20, yTermo); yTermo += 7;
+        doc.text('Email: ' + c.email, 20, yTermo); yTermo += 15;
+
+        doc.text('Local: _______________________________', 20, yTermo);
+        doc.text('Data: _____ / _____ / __________', 120, yTermo);
+        yTermo += 20;
+        doc.text('_________________________________________', 20, yTermo);
+        doc.text('Assinatura do Proponente', 20, yTermo + 5);
+        doc.text('_________________________________________', 120, yTermo);
+        doc.text('Tiago Sant\'ana - CRECI F45549', 120, yTermo + 5);
+        doc.text('Corretor Responsável', 120, yTermo + 10);
+        yTermo += 30;
+        doc.setFontSize(10); doc.setTextColor(100);
+        doc.text('Testemunhas (opcional):', 20, yTermo); yTermo += 10;
+        doc.text('1. _________________________________________', 20, yTermo);
+        doc.text('CPF: _________________________', 20, yTermo + 5);
+        yTermo += 15;
+        doc.text('2. _________________________________________', 20, yTermo);
+        doc.text('CPF: _________________________', 20, yTermo + 5);
+
+        var pageCount = doc.getNumberOfPages();
+        for (var i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(9); doc.setTextColor(100);
+            doc.text('Simulação gerada em ' + new Date().toLocaleDateString('pt-BR') + ' - Página ' + i + ' de ' + pageCount, 14, 285);
+            doc.text('Documento de planejamento - Tiago Sant\'ana CRECI F45549', 14, 290);
+        }
+        doc.save('Proposta_' + c.nome.replace(/\s+/g, '_') + '_' + e.replace(/\s+/g, '_') + '.pdf');
+    }
+
+    calcularBtn.addEventListener('click', calcularFluxo);
+    pdfBtn.addEventListener('click', function(){ if (!ultimaSimulacao.linhas.length) calcularFluxo(); gerarPDF(); });
+    window.addEventListener('DOMContentLoaded', function(){
+        corpoTabela.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">Preencha os dados e clique em CALCULAR FLUXO</td></tr>';
+        totalPagoSpan.textContent = 'R$ 0,00'; totalJurosSpan.textContent = 'R$ 0,00'; saldoFinalSpan.textContent = 'R$ 0,00';
+        atualizarTitulo();
+    });
+})();
+</script>
+</body>
+</html>
