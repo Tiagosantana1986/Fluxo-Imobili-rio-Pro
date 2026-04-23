@@ -263,7 +263,8 @@
             <div style="font-size:12px; color:#8ba1bc; margin-top:6px;">Incidem até o mês da chave.</div>
 
             <button class="btn-primary" id="calcularBtn"><i class="fas fa-calculator"></i> CALCULAR FLUXO</button>
-            <button class="btn-primary btn-pdf" id="exportarPdfBtn"><i class="fas fa-file-pdf"></i> EXPORTAR PDF</button>
+            <button class="btn-primary btn-pdf" id="exportarPdfBtn"><i class="fas fa-eye"></i> VISUALIZAR PDF</button>
+            <button class="btn-primary btn-pdf" id="downloadPdfBtn" style="display:none;"><i class="fas fa-download"></i> BAIXAR PDF</button>
 
             <div class="summary-mini">
                 <div class="summary-row"><span>Total Pago (sem juros):</span> <span id="totalPagoBruto">R$ 0,00</span></div>
@@ -332,6 +333,7 @@
     var tituloCron = document.getElementById('tituloCronograma');
     var calcularBtn = document.getElementById('calcularBtn');
     var pdfBtn = document.getElementById('exportarPdfBtn');
+    var downloadBtn = document.getElementById('downloadPdfBtn');
     var novoValor = document.getElementById('novoBalaoValor');
     var novoMes = document.getElementById('novoBalaoMes');
     var addBalaoBtn = document.getElementById('adicionarBalaoBtn');
@@ -491,13 +493,12 @@
         atualizarTitulo();
     }
 
-    function gerarPDF() {
+    function gerarPDF(baixar) {
         if (!ultimaSimulacao.linhas.length) calcularFluxo();
         var doc = new window.jspdf.jsPDF();
         var e = ultimaSimulacao.params.emp;
         var c = ultimaSimulacao.cliente;
 
-        // Página 1: Proposta
         doc.setFontSize(22); doc.setTextColor(30, 136, 229); doc.text('Calculadora de Fluxo Inteligente', 14, 20);
         doc.setFontSize(12); doc.setTextColor(80); doc.text('Proposta de Pagamento Personalizada', 14, 28);
         doc.setFontSize(11); doc.setTextColor(40);
@@ -566,32 +567,24 @@
         });
         doc.autoTable({ startY: yAtual, head: [colunas], body: linhasPDF, theme: 'striped', styles: { fontSize: 8 }, headStyles: { fillColor: [44, 62, 80] }, columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' } } });
 
-        // ========== PÁGINA 2: TERMO DE ADESÃO (MODELO CORRETO) ==========
+        // TERMO DE ADESÃO
         doc.addPage();
         doc.setFontSize(18); doc.setTextColor(30, 136, 229);
         doc.text('TERMO DE ADESÃO', 105, 20, { align: 'center' });
-
         doc.setFontSize(10); doc.setTextColor(40);
-        var textoTermo = 'Pelo presente instrumento, o(a) CONTRATANTE, ' + c.nome.toUpperCase() + ', portador do CPF nº ' + c.cpf + ' e da Cédula de Identidade nº ' + c.rg + ', residente e domiciliado à ' + c.endereco + ', ' + c.cidade + ', DECLARA ter recebido e concordado com o fluxo de pagamento do ' + e.toUpperCase() + ', conforme condições financeiras apresentadas na tabela acima.';
+        var textoTermo = 'Pelo presente instrumento, o(a) CONTRATANTE, ' + c.nome.toUpperCase() + ', portador do CPF nº ' + c.cpf + ' e da Cédula de Identidade nº ' + c.rg + ', residente e domiciliado à ' + c.endereco + ', ' + c.cidade + ', DECLARA ter recebido e concordado com o fluxo de pagamento do ' + e.toUpperCase() + ', conforme condições financeiras apresentadas na tabela anterior.';
         var lines = doc.splitTextToSize(textoTermo, 180);
-        doc.text(lines, 14, 40);
-
-        doc.text('Declara, ainda, estar ciente dos valores, prazos e formas de pagamento, comprometendo-se ao seu integral cumprimento.', 14, 60);
-        doc.text('Este termo constitui formalização prévia à elaboração do contrato definitivo.', 14, 70);
-        doc.text('Por estarem de acordo, firmam o presente termo.', 14, 80);
-
-        doc.text(c.cidade + ', _____ de _____ de 20_____.', 14, 95);
-
-        // Linhas de assinatura
-        doc.text('_________________________________________', 14, 115);
-        doc.text('Cliente', 14, 120);
-        doc.text(c.nome, 14, 125);
-        doc.text('CPF: ' + c.cpf + ' | RG: ' + c.rg, 14, 130);
-
-        doc.text('_________________________________________', 120, 115);
-        doc.text('Corretor', 120, 120);
-        doc.text('Tiago dos Santos Sant\'ana', 120, 125);
-        doc.text('CRECI: F45549/PR', 120, 130);
+        doc.text(lines, 14, 35);
+        doc.text('Declara, ainda, estar ciente dos valores, prazos e formas de pagamento, comprometendo-se ao seu integral cumprimento.', 14, 55);
+        doc.text('Este termo constitui formalização prévia à elaboração do contrato definitivo.', 14, 65);
+        doc.text('Por estarem de acordo, firmam o presente termo.', 14, 75);
+        doc.text(c.cidade + ', _____ de _____ de 20_____.', 14, 90);
+        doc.text('_________________________________________', 14, 110);
+        doc.text('Cliente - ' + c.nome, 14, 115);
+        doc.text('CPF: ' + c.cpf + ' | RG: ' + c.rg, 14, 120);
+        doc.text('_________________________________________', 120, 110);
+        doc.text('Tiago dos Santos Sant\'ana', 120, 115);
+        doc.text('CRECI: F45549/PR', 120, 120);
 
         var pageCount = doc.getNumberOfPages();
         for (var i = 1; i <= pageCount; i++) {
@@ -600,11 +593,26 @@
             doc.text('Simulação gerada em ' + new Date().toLocaleDateString('pt-BR') + ' - Página ' + i + ' de ' + pageCount, 14, 285);
             doc.text('Documento de planejamento - Tiago Sant\'ana CRECI F45549', 14, 290);
         }
-        doc.save('Proposta_' + c.nome.replace(/\s+/g, '_') + '_' + e.replace(/\s+/g, '_') + '.pdf');
+
+        if (baixar) {
+            doc.save('Proposta_' + c.nome.replace(/\s+/g, '_') + '_' + e.replace(/\s+/g, '_') + '.pdf');
+        } else {
+            var blob = doc.output('blob');
+            var url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            downloadBtn.style.display = 'block';
+        }
     }
 
     calcularBtn.addEventListener('click', calcularFluxo);
-    pdfBtn.addEventListener('click', function(){ if (!ultimaSimulacao.linhas.length) calcularFluxo(); gerarPDF(); });
+    pdfBtn.addEventListener('click', function(){ 
+        if (!ultimaSimulacao.linhas.length) calcularFluxo(); 
+        gerarPDF(false); 
+    });
+    downloadBtn.addEventListener('click', function(){ 
+        gerarPDF(true); 
+    });
+
     window.addEventListener('DOMContentLoaded', function(){
         corpoTabela.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;">Preencha os dados e clique em CALCULAR FLUXO</td></tr>';
         totalPagoSpan.textContent = 'R$ 0,00'; totalJurosSpan.textContent = 'R$ 0,00'; saldoFinalSpan.textContent = 'R$ 0,00';
