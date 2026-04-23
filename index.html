@@ -188,8 +188,15 @@
         <div class="control-panel">
             <div class="section-title"><i class="fas fa-file-signature"></i> DADOS DO CLIENTE</div>
             <div class="input-group"><label>Nome do Cliente</label><input type="text" id="nomeCliente" placeholder="Ex: João da Silva" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
-            <div class="input-group"><label>CPF/CNPJ</label><input type="text" id="cpfCliente" placeholder="000.000.000-00" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
-            <div class="input-group"><label>Telefone</label><input type="text" id="telCliente" placeholder="(00) 00000-0000" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+            <div class="row-2">
+                <div class="input-group"><label>CPF</label><input type="text" id="cpfCliente" placeholder="000.000.000-00" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+                <div class="input-group"><label>RG</label><input type="text" id="rgCliente" placeholder="00.000.000-0" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+            </div>
+            <div class="input-group"><label>Endereço</label><input type="text" id="enderecoCliente" placeholder="Rua, número, bairro" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+            <div class="row-2">
+                <div class="input-group"><label>Cidade/UF</label><input type="text" id="cidadeCliente" placeholder="Londrina/PR" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+                <div class="input-group"><label>Telefone</label><input type="text" id="telCliente" placeholder="(00) 00000-0000" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
+            </div>
             <div class="input-group"><label>Email</label><input type="email" id="emailCliente" placeholder="cliente@email.com" style="background:#0a121c; border:1.5px solid #2d4a63; border-radius:16px; padding:14px; color:white; width:100%;"></div>
 
             <div class="divider"></div>
@@ -199,10 +206,7 @@
             <div class="divider"></div>
             <div class="section-title"><i class="fas fa-home"></i> DADOS DO IMÓVEL</div>
             <div class="input-group"><label>Valor do Imóvel (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="valorImovel" placeholder="0,00" step="1000"></div></div>
-            <div class="row-2">
-                <div class="input-group"><label>Termo de Adesão (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="termoAdesao" placeholder="0,00" step="1000"></div></div>
-                <div class="input-group"><label>Sinal de Negócio (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="sinal" placeholder="0,00" step="1000"></div></div>
-            </div>
+            <div class="input-group"><label>Sinal de Negócio (R$)</label><div class="input-wrapper"><span>R$</span><input type="number" id="sinal" placeholder="0,00" step="1000"></div></div>
 
             <div class="divider"></div>
             <div class="section-title"><i class="fas fa-coins"></i> ENTRADA (adicional)</div>
@@ -291,13 +295,16 @@
 <script>
 (function(){
     "use strict";
+    // DOM Elements
     var nomeClienteInput = document.getElementById('nomeCliente');
     var cpfClienteInput = document.getElementById('cpfCliente');
+    var rgClienteInput = document.getElementById('rgCliente');
+    var enderecoClienteInput = document.getElementById('enderecoCliente');
+    var cidadeClienteInput = document.getElementById('cidadeCliente');
     var telClienteInput = document.getElementById('telCliente');
     var emailClienteInput = document.getElementById('emailCliente');
     var nomeInput = document.getElementById('nomeEmpreendimento');
     var valorImovelInput = document.getElementById('valorImovel');
-    var termoAdesaoInput = document.getElementById('termoAdesao');
     var sinalInput = document.getElementById('sinal');
     var tipoEntradaSelect = document.getElementById('tipoEntrada');
     var entradaAvistaDiv = document.getElementById('entradaAvista');
@@ -373,7 +380,6 @@
 
     function calcularFluxo() {
         var vImovel = parseFloat(valorImovelInput.value) || 0;
-        var termoAdesao = parseFloat(termoAdesaoInput.value) || 0;
         var sinal = parseFloat(sinalInput.value) || 0;
         var chaveV = parseFloat(chaveValorInput.value) || 0;
         var mesChave = parseInt(mesChaveInput.value) || 0;
@@ -394,7 +400,7 @@
         } else {
             var prazo = parseInt(prazoInput.value) || 0;
             if (prazo <= 0) { alert('Prazo necessário.'); return; }
-            var saldo = vImovel - termoAdesao - sinal;
+            var saldo = vImovel - sinal;
             if (modo === 'sac') {
                 var amort = saldo / prazo;
                 for (var i = 1; i <= prazo; i++) {
@@ -409,7 +415,6 @@
         if (mesChave === 0) mesChave = parcelas.length ? Math.max.apply(null, parcelas.map(function(p){ return p.mes; })) : 0;
 
         var eventos = [];
-        if (termoAdesao > 0) eventos.push({ mes: 0, tipo: 'termo', valor: termoAdesao });
         if (sinal > 0) eventos.push({ mes: 0, tipo: 'sinal', valor: sinal });
         parcelas.forEach(function(p){ eventos.push({ mes: p.mes, tipo: 'parcela', valor: p.valor }); });
         if (tipoEntradaSelect.value === 'avista') {
@@ -429,9 +434,8 @@
         if (chaveV > 0 && mesChave > 0) eventos.push({ mes: mesChave, tipo: 'chave', valor: chaveV });
         eventos.sort(function(a, b){ return a.mes - b.mes; });
 
-        var saldo = vImovel - termoAdesao - sinal, jurosTotal = 0, pagoBruto = termoAdesao + sinal;
+        var saldo = vImovel - sinal, jurosTotal = 0, pagoBruto = sinal;
         var linhas = [];
-        if (termoAdesao > 0) linhas.push({ mes: 0, evento: 'Termo de Adesão', valorPago: termoAdesao, juros: 0, amortizacao: termoAdesao, saldo: saldo });
         if (sinal > 0) linhas.push({ mes: 0, evento: 'Sinal de Negócio', valorPago: sinal, juros: 0, amortizacao: sinal, saldo: saldo });
 
         for (var i = 0; i < eventos.length; i++) {
@@ -469,7 +473,6 @@
             params: {
                 emp: nomeInput.value.trim() || 'Não informado',
                 vImovel: formatReal(vImovel),
-                termo: formatReal(termoAdesao),
                 sinal: formatReal(sinal),
                 parcelas: modo === 'personalizado' ? (numParcelasInput.value || 0) + 'x ' + formatReal(parseFloat(valorParcelaInput.value) || 0) : (prazoInput.value || 0) + ' parcelas (' + modo.toUpperCase() + ')',
                 chave: formatReal(chaveV) + ' (mês ' + mesChave + ')',
@@ -478,6 +481,9 @@
             cliente: {
                 nome: nomeClienteInput.value.trim() || 'Não informado',
                 cpf: cpfClienteInput.value.trim() || 'Não informado',
+                rg: rgClienteInput.value.trim() || 'Não informado',
+                endereco: enderecoClienteInput.value.trim() || 'Não informado',
+                cidade: cidadeClienteInput.value.trim() || 'Não informado',
                 tel: telClienteInput.value.trim() || 'Não informado',
                 email: emailClienteInput.value.trim() || 'Não informado'
             }
@@ -491,13 +497,14 @@
         var e = ultimaSimulacao.params.emp;
         var c = ultimaSimulacao.cliente;
 
+        // Página 1: Proposta
         doc.setFontSize(22); doc.setTextColor(30, 136, 229); doc.text('Calculadora de Fluxo Inteligente', 14, 20);
         doc.setFontSize(12); doc.setTextColor(80); doc.text('Proposta de Pagamento Personalizada', 14, 28);
         doc.setFontSize(11); doc.setTextColor(40);
         doc.text('Cliente: ' + c.nome, 14, 40);
-        doc.text('CPF/CNPJ: ' + c.cpf, 14, 46);
-        doc.text('Telefone: ' + c.tel, 14, 52);
-        doc.text('Email: ' + c.email, 14, 58);
+        doc.text('CPF: ' + c.cpf + ' | RG: ' + c.rg, 14, 46);
+        doc.text('Endereço: ' + c.endereco + ' | Cidade: ' + c.cidade, 14, 52);
+        doc.text('Telefone: ' + c.tel + ' | Email: ' + c.email, 14, 58);
         doc.text('Empreendimento: ' + e, 14, 68);
         doc.text('Tiago Sant\'ana - CRECI F45549 - (43) 99984-1199', 14, 76);
 
@@ -506,7 +513,6 @@
             head: [['Item', 'Valor']],
             body: [
                 ['Valor do Imóvel', ultimaSimulacao.params.vImovel],
-                ['Termo de Adesão', ultimaSimulacao.params.termo],
                 ['Sinal de Negócio', ultimaSimulacao.params.sinal],
                 ['Parcelas Mensais', ultimaSimulacao.params.parcelas],
                 ['Parcela Chave', ultimaSimulacao.params.chave],
@@ -560,57 +566,32 @@
         });
         doc.autoTable({ startY: yAtual, head: [colunas], body: linhasPDF, theme: 'striped', styles: { fontSize: 8 }, headStyles: { fillColor: [44, 62, 80] }, columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' } } });
 
-        // ========== TERMO DE ADESÃO (PÁGINA FINAL) ==========
+        // ========== PÁGINA 2: TERMO DE ADESÃO (MODELO CORRETO) ==========
         doc.addPage();
         doc.setFontSize(18); doc.setTextColor(30, 136, 229);
-        doc.text('TERMO DE ADESÃO À PROPOSTA', 105, 20, { align: 'center' });
-        doc.setFontSize(10); doc.setTextColor(40);
-        var textoTermo = [
-            'Pelo presente instrumento, o(a) proponente abaixo qualificado(a) declara estar ciente e de acordo',
-            'com todas as condições da proposta de pagamento apresentada neste documento, referente ao',
-            'imóvel do empreendimento ' + e.toUpperCase() + ', conforme simulação detalhada nas páginas anteriores.',
-            '',
-            'O(a) proponente reconhece que:',
-            '1. Recebeu e compreendeu integralmente o cronograma de pagamentos;',
-            '2. Está ciente dos valores de entrada, parcelas mensais, balões intermediários e parcela chave;',
-            '3. Tem conhecimento da taxa de juros aplicada durante o período de obra;',
-            '4. Autoriza o corretor Tiago Sant\'ana a dar andamento ao processo de aquisição do imóvel.',
-            '',
-            'Este termo não configura contrato definitivo de compra e venda, mas sim a aceitação formal',
-            'das condições comerciais aqui simuladas, servindo como base para a elaboração do contrato final.',
-            '',
-            'Estando de acordo, firma o presente termo em duas vias de igual teor.'
-        ];
-        var yTermo = 35;
-        for (var i = 0; i < textoTermo.length; i++) {
-            doc.text(textoTermo[i], 20, yTermo);
-            yTermo += textoTermo[i] === '' ? 4 : 5;
-        }
-        yTermo += 10;
-        doc.setFontSize(11); doc.setTextColor(30, 136, 229); doc.text('DADOS DO PROPONENTE', 20, yTermo);
-        yTermo += 8;
-        doc.setFontSize(10); doc.setTextColor(40);
-        doc.text('Nome Completo: ' + c.nome, 20, yTermo); yTermo += 7;
-        doc.text('CPF/CNPJ: ' + c.cpf, 20, yTermo); yTermo += 7;
-        doc.text('Telefone: ' + c.tel, 20, yTermo); yTermo += 7;
-        doc.text('Email: ' + c.email, 20, yTermo); yTermo += 15;
+        doc.text('TERMO DE ADESÃO', 105, 20, { align: 'center' });
 
-        doc.text('Local: _______________________________', 20, yTermo);
-        doc.text('Data: _____ / _____ / __________', 120, yTermo);
-        yTermo += 20;
-        doc.text('_________________________________________', 20, yTermo);
-        doc.text('Assinatura do Proponente', 20, yTermo + 5);
-        doc.text('_________________________________________', 120, yTermo);
-        doc.text('Tiago Sant\'ana - CRECI F45549', 120, yTermo + 5);
-        doc.text('Corretor Responsável', 120, yTermo + 10);
-        yTermo += 30;
-        doc.setFontSize(10); doc.setTextColor(100);
-        doc.text('Testemunhas (opcional):', 20, yTermo); yTermo += 10;
-        doc.text('1. _________________________________________', 20, yTermo);
-        doc.text('CPF: _________________________', 20, yTermo + 5);
-        yTermo += 15;
-        doc.text('2. _________________________________________', 20, yTermo);
-        doc.text('CPF: _________________________', 20, yTermo + 5);
+        doc.setFontSize(10); doc.setTextColor(40);
+        var textoTermo = 'Pelo presente instrumento, o(a) CONTRATANTE, ' + c.nome.toUpperCase() + ', portador do CPF nº ' + c.cpf + ' e da Cédula de Identidade nº ' + c.rg + ', residente e domiciliado à ' + c.endereco + ', ' + c.cidade + ', DECLARA ter recebido e concordado com o fluxo de pagamento do ' + e.toUpperCase() + ', conforme condições financeiras apresentadas na tabela acima.';
+        var lines = doc.splitTextToSize(textoTermo, 180);
+        doc.text(lines, 14, 40);
+
+        doc.text('Declara, ainda, estar ciente dos valores, prazos e formas de pagamento, comprometendo-se ao seu integral cumprimento.', 14, 60);
+        doc.text('Este termo constitui formalização prévia à elaboração do contrato definitivo.', 14, 70);
+        doc.text('Por estarem de acordo, firmam o presente termo.', 14, 80);
+
+        doc.text(c.cidade + ', _____ de _____ de 20_____.', 14, 95);
+
+        // Linhas de assinatura
+        doc.text('_________________________________________', 14, 115);
+        doc.text('Cliente', 14, 120);
+        doc.text(c.nome, 14, 125);
+        doc.text('CPF: ' + c.cpf + ' | RG: ' + c.rg, 14, 130);
+
+        doc.text('_________________________________________', 120, 115);
+        doc.text('Corretor', 120, 120);
+        doc.text('Tiago dos Santos Sant\'ana', 120, 125);
+        doc.text('CRECI: F45549/PR', 120, 130);
 
         var pageCount = doc.getNumberOfPages();
         for (var i = 1; i <= pageCount; i++) {
