@@ -530,6 +530,7 @@
 
         var entradas = ultimaSimulacao.linhas.filter(function(l){ return l.evento.includes('Entrada'); });
         if (entradas.length > 0) {
+            if (yAtual > 230) { doc.addPage(); yAtual = 20; }
             doc.setFontSize(13); doc.setTextColor(30, 136, 229);
             doc.text('PARCELAS DE ENTRADA', 14, yAtual);
             yAtual += 6;
@@ -540,6 +541,7 @@
 
         var baloesLinhas = ultimaSimulacao.linhas.filter(function(l){ return l.evento.includes('Balao'); });
         if (baloesLinhas.length > 0) {
+            if (yAtual > 230) { doc.addPage(); yAtual = 20; }
             doc.setFontSize(13); doc.setTextColor(30, 136, 229);
             doc.text('BALOES INTERMEDIARIOS', 14, yAtual);
             yAtual += 6;
@@ -550,6 +552,7 @@
 
         var chave = ultimaSimulacao.linhas.find(function(l){ return l.evento.includes('Chave'); });
         if (chave) {
+            if (yAtual > 230) { doc.addPage(); yAtual = 20; }
             doc.setFontSize(13); doc.setTextColor(30, 136, 229);
             doc.text('PARCELA CHAVE (Entrega)', 14, yAtual);
             yAtual += 6;
@@ -557,6 +560,7 @@
             yAtual = doc.lastAutoTable.finalY + 10;
         }
 
+        if (yAtual > 230) { doc.addPage(); yAtual = 20; }
         doc.setFontSize(14); doc.setTextColor(30, 136, 229);
         doc.text('CRONOGRAMA DETALHADO DE PAGAMENTOS', 14, yAtual);
         yAtual += 6;
@@ -573,17 +577,27 @@
         doc.setFontSize(10); doc.setTextColor(40);
         var textoTermo = 'Pelo presente instrumento, o(a) CONTRATANTE, ' + c.nome.toUpperCase() + ', portador do CPF n ' + c.cpf + ' e da Cedula de Identidade n ' + c.rg + ', residente e domiciliado a ' + c.endereco + ', ' + c.cidade + ', DECLARA ter recebido e concordado com o fluxo de pagamento do ' + e.toUpperCase() + ', conforme condicoes financeiras apresentadas na tabela anterior.';
         var lines = doc.splitTextToSize(textoTermo, 180);
-        doc.text(lines, 14, 35);
-        doc.text('Declara, ainda, estar ciente dos valores, prazos e formas de pagamento, comprometendo-se ao seu integral cumprimento.', 14, 55);
-        doc.text('Este termo constitui formalizacao previa a elaboracao do contrato definitivo.', 14, 65);
-        doc.text('Por estarem de acordo, firmam o presente termo.', 14, 75);
-        doc.text(c.cidade + ', _____ de _____ de 20_____.', 14, 90);
-        doc.text('_________________________________________', 14, 110);
-        doc.text('Cliente - ' + c.nome, 14, 115);
-        doc.text('CPF: ' + c.cpf + ' | RG: ' + c.rg, 14, 120);
-        doc.text('_________________________________________', 120, 110);
-        doc.text('Tiago dos Santos Santana', 120, 115);
-        doc.text('CRECI: F45549/PR', 120, 120);
+        doc.text(lines, 14, 40);
+        doc.text('Declara, ainda, estar ciente dos valores, prazos e formas de pagamento, comprometendo-se ao seu integral cumprimento.', 14, 65);
+        doc.text('Este termo constitui formalizacao previa a elaboracao do contrato definitivo.', 14, 75);
+        doc.text('Por estarem de acordo, firmam o presente termo.', 14, 85);
+
+        // Espaços maiores para a data
+        doc.text(c.cidade + ', ______ de ____________________ de ___________.', 14, 105);
+
+        // Linhas de assinatura
+        doc.text('_________________________________________', 14, 130);
+        doc.text('Cliente - ' + c.nome, 14, 138);
+        doc.text('CPF: ' + c.cpf + ' | RG: ' + c.rg, 14, 145);
+
+        doc.text('_________________________________________', 120, 130);
+        doc.text('Tiago dos Santos Santana', 120, 138);
+        doc.text('CRECI: F45549/PR', 120, 145);
+
+        // Testemunhas
+        doc.text('Testemunhas:', 14, 170);
+        doc.text('1. _________________________________________ CPF: _________________________', 14, 180);
+        doc.text('2. _________________________________________ CPF: _________________________', 14, 190);
 
         var pageCount = doc.getNumberOfPages();
         for (var i = 1; i <= pageCount; i++) {
