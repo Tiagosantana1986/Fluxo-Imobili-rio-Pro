@@ -296,7 +296,6 @@
 <script>
 (function(){
     "use strict";
-    // DOM Elements
     var nomeClienteInput = document.getElementById('nomeCliente');
     var cpfClienteInput = document.getElementById('cpfCliente');
     var rgClienteInput = document.getElementById('rgCliente');
@@ -449,23 +448,23 @@
             var amort = valor - juros; if (amort < 0) amort = 0;
             saldo = Math.max(0, saldo - amort);
             var nome = ev.tipo === 'parcela' ? 'Parcela ' + m :
-                       ev.tipo === 'entrada' ? '💰 Entrada' :
-                       ev.tipo === 'entradaParc' ? '💰 Entrada Parc.' :
-                       ev.tipo === 'balao' ? '📌 Balão' : '🏠 Chave';
+                       ev.tipo === 'entrada' ? 'Entrada' :
+                       ev.tipo === 'entradaParc' ? 'Entrada Parc.' :
+                       ev.tipo === 'balao' ? 'Balão' : 'Chave';
             linhas.push({ mes: m, evento: nome, valorPago: valor, juros: juros, amortizacao: amort, saldo: saldo });
         }
 
         totalPagoSpan.textContent = formatReal(pagoBruto);
         totalJurosSpan.textContent = formatReal(jurosTotal);
         saldoFinalSpan.textContent = formatReal(saldo);
-        if (Math.abs(saldo) < 0.01) { msgStatus.innerHTML = '✅ Fluxo equilibrado'; saldoFinalSpan.style.color = '#81c784'; }
-        else if (saldo > 0) { msgStatus.innerHTML = '⚠️ Saldo devedor'; saldoFinalSpan.style.color = '#ffb74d'; }
-        else { msgStatus.innerHTML = '🔵 Excedente'; saldoFinalSpan.style.color = '#64b5f6'; }
+        if (Math.abs(saldo) < 0.01) { msgStatus.innerHTML = 'Fluxo equilibrado'; saldoFinalSpan.style.color = '#81c784'; }
+        else if (saldo > 0) { msgStatus.innerHTML = 'Saldo devedor'; saldoFinalSpan.style.color = '#ffb74d'; }
+        else { msgStatus.innerHTML = 'Excedente'; saldoFinalSpan.style.color = '#64b5f6'; }
 
         var html = '';
         linhas.forEach(function(l){
             var cls = (l.mes === mesChave && l.evento.includes('Chave')) ? 'highlight-chave' : '';
-            html += '<tr class="' + cls + '"><td>' + (l.mes === 0 ? '—' : l.mes) + '</td><td>' + l.evento + '</td><td class="text-right">' + formatReal(l.valorPago) + '</td><td class="text-right">' + formatReal(l.juros) + '</td><td class="text-right">' + formatReal(l.amortizacao) + '</td><td class="text-right">' + formatReal(l.saldo) + '</td></tr>';
+            html += '<tr class="' + cls + '"><td>' + (l.mes === 0 ? '-' : l.mes) + '</td><td>' + l.evento + '</td><td class="text-right">' + formatReal(l.valorPago) + '</td><td class="text-right">' + formatReal(l.juros) + '</td><td class="text-right">' + formatReal(l.amortizacao) + '</td><td class="text-right">' + formatReal(l.saldo) + '</td></tr>';
         });
         corpoTabela.innerHTML = html;
 
@@ -504,17 +503,17 @@
         doc.setFontSize(11); doc.setTextColor(40);
         doc.text('Cliente: ' + c.nome, 14, 40);
         doc.text('CPF: ' + c.cpf + ' | RG: ' + c.rg, 14, 46);
-        doc.text('Endereço: ' + c.endereco + ' | Cidade: ' + c.cidade, 14, 52);
+        doc.text('Endereco: ' + c.endereco + ' | Cidade: ' + c.cidade, 14, 52);
         doc.text('Telefone: ' + c.tel + ' | Email: ' + c.email, 14, 58);
         doc.text('Empreendimento: ' + e, 14, 68);
-        doc.text('Tiago Sant\'ana - CRECI F45549 - (43) 99984-1199', 14, 76);
+        doc.text('Tiago Santana - CRECI F45549 - (43) 99984-1199', 14, 76);
 
         doc.autoTable({
             startY: 85,
             head: [['Item', 'Valor']],
             body: [
-                ['Valor do Imóvel', ultimaSimulacao.params.vImovel],
-                ['Sinal de Negócio', ultimaSimulacao.params.sinal],
+                ['Valor do Imovel', ultimaSimulacao.params.vImovel],
+                ['Sinal de Negocio', ultimaSimulacao.params.sinal],
                 ['Parcelas Mensais', ultimaSimulacao.params.parcelas],
                 ['Parcela Chave', ultimaSimulacao.params.chave],
                 ['Juros', ultimaSimulacao.params.juros],
@@ -534,18 +533,18 @@
             doc.setFontSize(13); doc.setTextColor(30, 136, 229);
             doc.text('PARCELAS DE ENTRADA', 14, yAtual);
             yAtual += 6;
-            var entradasBody = entradas.map(function(e){ return ['Mês ' + e.mes, formatReal(e.valorPago)]; });
-            doc.autoTable({ startY: yAtual, head: [['Mês', 'Valor']], body: entradasBody, theme: 'striped', styles: { fontSize: 9 }, headStyles: { fillColor: [100, 100, 100] }, columnStyles: { 1: { halign: 'right' } } });
+            var entradasBody = entradas.map(function(e){ return ['Mes ' + e.mes, formatReal(e.valorPago)]; });
+            doc.autoTable({ startY: yAtual, head: [['Mes', 'Valor']], body: entradasBody, theme: 'striped', styles: { fontSize: 9 }, headStyles: { fillColor: [100, 100, 100] }, columnStyles: { 1: { halign: 'right' } } });
             yAtual = doc.lastAutoTable.finalY + 8;
         }
 
-        var baloesLinhas = ultimaSimulacao.linhas.filter(function(l){ return l.evento.includes('Balão'); });
+        var baloesLinhas = ultimaSimulacao.linhas.filter(function(l){ return l.evento.includes('Balao'); });
         if (baloesLinhas.length > 0) {
             doc.setFontSize(13); doc.setTextColor(30, 136, 229);
-            doc.text('BALÕES INTERMEDIÁRIOS', 14, yAtual);
+            doc.text('BALOES INTERMEDIARIOS', 14, yAtual);
             yAtual += 6;
-            var baloesBody = baloesLinhas.map(function(b){ return ['Mês ' + b.mes, formatReal(b.valorPago)]; });
-            doc.autoTable({ startY: yAtual, head: [['Mês do Balão', 'Valor']], body: baloesBody, theme: 'striped', styles: { fontSize: 9 }, headStyles: { fillColor: [255, 152, 0] }, columnStyles: { 1: { halign: 'right' } } });
+            var baloesBody = baloesLinhas.map(function(b){ return ['Mes ' + b.mes, formatReal(b.valorPago)]; });
+            doc.autoTable({ startY: yAtual, head: [['Mes do Balao', 'Valor']], body: baloesBody, theme: 'striped', styles: { fontSize: 9 }, headStyles: { fillColor: [255, 152, 0] }, columnStyles: { 1: { halign: 'right' } } });
             yAtual = doc.lastAutoTable.finalY + 8;
         }
 
@@ -554,44 +553,44 @@
             doc.setFontSize(13); doc.setTextColor(30, 136, 229);
             doc.text('PARCELA CHAVE (Entrega)', 14, yAtual);
             yAtual += 6;
-            doc.autoTable({ startY: yAtual, head: [['Mês', 'Valor']], body: [['Mês ' + chave.mes, formatReal(chave.valorPago)]], theme: 'striped', styles: { fontSize: 9 }, headStyles: { fillColor: [46, 125, 50] }, columnStyles: { 1: { halign: 'right' } } });
+            doc.autoTable({ startY: yAtual, head: [['Mes', 'Valor']], body: [['Mes ' + chave.mes, formatReal(chave.valorPago)]], theme: 'striped', styles: { fontSize: 9 }, headStyles: { fillColor: [46, 125, 50] }, columnStyles: { 1: { halign: 'right' } } });
             yAtual = doc.lastAutoTable.finalY + 10;
         }
 
         doc.setFontSize(14); doc.setTextColor(30, 136, 229);
         doc.text('CRONOGRAMA DETALHADO DE PAGAMENTOS', 14, yAtual);
         yAtual += 6;
-        var colunas = ['Mês', 'Evento', 'Valor Pago', 'Juros', 'Amortização', 'Saldo Devedor'];
+        var colunas = ['Mes', 'Evento', 'Valor Pago', 'Juros', 'Amortizacao', 'Saldo Devedor'];
         var linhasPDF = ultimaSimulacao.linhas.map(function(l){
-            return [l.mes === 0 ? '—' : l.mes, l.evento, formatReal(l.valorPago), formatReal(l.juros), formatReal(l.amortizacao), formatReal(l.saldo)];
+            return [l.mes === 0 ? '-' : l.mes, l.evento, formatReal(l.valorPago), formatReal(l.juros), formatReal(l.amortizacao), formatReal(l.saldo)];
         });
         doc.autoTable({ startY: yAtual, head: [colunas], body: linhasPDF, theme: 'striped', styles: { fontSize: 8 }, headStyles: { fillColor: [44, 62, 80] }, columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' }, 5: { halign: 'right' } } });
 
-        // TERMO DE ADESÃO
+        // TERMO DE ADESAO
         doc.addPage();
         doc.setFontSize(18); doc.setTextColor(30, 136, 229);
-        doc.text('TERMO DE ADESÃO', 105, 20, { align: 'center' });
+        doc.text('TERMO DE ADESAO', 105, 20, { align: 'center' });
         doc.setFontSize(10); doc.setTextColor(40);
-        var textoTermo = 'Pelo presente instrumento, o(a) CONTRATANTE, ' + c.nome.toUpperCase() + ', portador do CPF nº ' + c.cpf + ' e da Cédula de Identidade nº ' + c.rg + ', residente e domiciliado à ' + c.endereco + ', ' + c.cidade + ', DECLARA ter recebido e concordado com o fluxo de pagamento do ' + e.toUpperCase() + ', conforme condições financeiras apresentadas na tabela anterior.';
+        var textoTermo = 'Pelo presente instrumento, o(a) CONTRATANTE, ' + c.nome.toUpperCase() + ', portador do CPF n ' + c.cpf + ' e da Cedula de Identidade n ' + c.rg + ', residente e domiciliado a ' + c.endereco + ', ' + c.cidade + ', DECLARA ter recebido e concordado com o fluxo de pagamento do ' + e.toUpperCase() + ', conforme condicoes financeiras apresentadas na tabela anterior.';
         var lines = doc.splitTextToSize(textoTermo, 180);
         doc.text(lines, 14, 35);
         doc.text('Declara, ainda, estar ciente dos valores, prazos e formas de pagamento, comprometendo-se ao seu integral cumprimento.', 14, 55);
-        doc.text('Este termo constitui formalização prévia à elaboração do contrato definitivo.', 14, 65);
+        doc.text('Este termo constitui formalizacao previa a elaboracao do contrato definitivo.', 14, 65);
         doc.text('Por estarem de acordo, firmam o presente termo.', 14, 75);
         doc.text(c.cidade + ', _____ de _____ de 20_____.', 14, 90);
         doc.text('_________________________________________', 14, 110);
         doc.text('Cliente - ' + c.nome, 14, 115);
         doc.text('CPF: ' + c.cpf + ' | RG: ' + c.rg, 14, 120);
         doc.text('_________________________________________', 120, 110);
-        doc.text('Tiago dos Santos Sant\'ana', 120, 115);
+        doc.text('Tiago dos Santos Santana', 120, 115);
         doc.text('CRECI: F45549/PR', 120, 120);
 
         var pageCount = doc.getNumberOfPages();
         for (var i = 1; i <= pageCount; i++) {
             doc.setPage(i);
             doc.setFontSize(9); doc.setTextColor(100);
-            doc.text('Simulação gerada em ' + new Date().toLocaleDateString('pt-BR') + ' - Página ' + i + ' de ' + pageCount, 14, 285);
-            doc.text('Documento de planejamento - Tiago Sant\'ana CRECI F45549', 14, 290);
+            doc.text('Simulacao gerada em ' + new Date().toLocaleDateString('pt-BR') + ' - Pagina ' + i + ' de ' + pageCount, 14, 285);
+            doc.text('Documento de planejamento - Tiago Santana CRECI F45549', 14, 290);
         }
 
         if (baixar) {
